@@ -1,30 +1,57 @@
 #include <iostream>
+#include <vector>
+#include <cmath>
+
 #include "graphics.h"
 #pragma comment(lib,"graphics.lib")
+using namespace std;
+const double M_PI = 3.14159265358979323846;
+
+void bezier(const vector<int>& x, const vector<int>& y)
+{
+    int n = x.size() - 1;
+    float t, b;
+    int px = x[0], py = y[0];
+    for (t = 0; t <= 1; t += 0.001) { // Приращение параметра
+        b = 0;
+        for (int i = 0; i <= n; i++) {
+            b += pow((1 - t), n - i) * pow(t, i) * x[i] * pow((1 - t), n - i) * pow(t, i) * y[i];
+        }
+        putpixel(px, py, RED);
+        px = b * cos(t * 2 * M_PI) + x[0];
+        py = b * sin(t * 2 * M_PI) + y[0];
+    }
+}
+
 int main()
 {
+
     char pathtodriver[] = "";
     int driver, mode;
     driver = DETECT; /* автоопределение */
     mode = 0;
     initgraph(&driver, &mode, pathtodriver);
 
-    int x0 = 100, y0 = 100, size = 200;
-    int x1 = x0 + size, y1 = y0;
-    int x2 = x1, y2 = y1 + size;
-    int x3 = x2 - size, y3 = y2;
+    // рисуем квадрат
+    int x[] = { 100, 150, 200, 200, 200, 150, 100, 100 };
+    int y[] = { 100, 100, 100, 150, 200, 200, 200, 150 };
+    int n = 8;
 
-    // Рисуем контур квадрата
-    line(x0, y0, x1, y1);
-    line(x1, y1, x2, y2);
-    line(x2, y2, x3, y3);
-    line(x3, y3, x0, y0);
+    // Чертим исходный квадрат
+    for (int i = 0; i < n - 1; i++)
+        line(x[i], y[i], x[i + 1], y[i + 1]);
+    line(x[n - 1], y[n - 1], x[0], y[0]);
 
-    // Заполняем квадрат заданными линиями
-    line((x0+x1)/2, (y0+y1)/2, x3, (y0+y2)/2);
-    line((x0 + x1) / 2, (y0 + y1) / 2, x2, y2);
-    line((x0 + x1) / 2, (y0 + y1) / 2, (x3+x2)/2, (y3+y2)/2);
-    line((x0 + x1) / 2, (y0 + y1) / 2, (x3+x2)/3, y3);
+    // Определяем новые точки для кривой Би-сплайна
+    int new_x[] = { 120, 130, 170, 180 };
+    int new_y[] = { 120, 190, 190, 120 };
+    int new_n = 4;
+
+    // Чертим кривую Би-сплайна
+    setcolor(RED);
+    for (int i = 0; i < new_n - 3; i++)
+        bezier(new_x + i, new_y + i);
+    
     getch();
     closegraph();
     return 0;
